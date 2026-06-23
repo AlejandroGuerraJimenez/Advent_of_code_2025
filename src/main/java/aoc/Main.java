@@ -5,6 +5,7 @@ import aoc.core.InputReader;
 import aoc.dia1.Day01;
 import aoc.dia2.Day02;
 import aoc.dia3.Day03;
+import aoc.dia4.Day04;
 import aoc.registry.DayRegistry;
 
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Scanner;
 
 public class Main {
 
-    static void main(String[] args) {
+    public static void main(String[] args) {
         int dayNumber = args.length > 0
                 ? Integer.parseInt(args[0])
                 : askDayNumber();
@@ -37,7 +38,8 @@ public class Main {
                 Map.of(
                     1, new Day01(),
                     2, new Day02(),
-                    3, new Day03()
+                    3, new Day03(),
+                    4, new Day04()
                 )
         );
     }
