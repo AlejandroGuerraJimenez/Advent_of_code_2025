@@ -12,6 +12,7 @@ import aoc.dia7.Day07;
 import aoc.dia8.Day08;
 import aoc.dia9.Day09;
 import aoc.dia10.Day10;
+import aoc.dia11.Day11;
 import aoc.registry.DayRegistry;
 
 import java.util.Map;
@@ -41,17 +42,18 @@ public class Main {
     private static DayRegistry buildRegistry() {
 
         return new DayRegistry(
-                Map.of(
-                    1, new Day01(),
-                    2, new Day02(),
-                    3, new Day03(),
-                    4, new Day04(),
-                    5, new Day05(),
-                    6, new Day06(),
-                    7, new Day07(),
-                    8, new Day08(),
-                    9, new Day09(),
-                    10, new Day10()
+                Map.ofEntries(
+                    Map.entry(1,  new Day01()),
+                    Map.entry(2,  new Day02()),
+                    Map.entry(3,  new Day03()),
+                    Map.entry(4,  new Day04()),
+                    Map.entry(5,  new Day05()),
+                    Map.entry(6,  new Day06()),
+                    Map.entry(7,  new Day07()),
+                    Map.entry(8,  new Day08()),
+                    Map.entry(9,  new Day09()),
+                    Map.entry(10, new Day10()),
+                    Map.entry(11, new Day11())
                 )
         );
     }
