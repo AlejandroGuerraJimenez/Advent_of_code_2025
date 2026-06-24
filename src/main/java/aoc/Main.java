@@ -11,6 +11,7 @@ import aoc.dia6.Day06;
 import aoc.dia7.Day07;
 import aoc.dia8.Day08;
 import aoc.dia9.Day09;
+import aoc.dia10.Day10;
 import aoc.registry.DayRegistry;
 
 import java.util.Map;
@@ -49,7 +50,8 @@ public class Main {
                     6, new Day06(),
                     7, new Day07(),
                     8, new Day08(),
-                    9, new Day09()
+                    9, new Day09(),
+                    10, new Day10()
                 )
         );
     }
