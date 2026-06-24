@@ -13,6 +13,7 @@ import aoc.dia8.Day08;
 import aoc.dia9.Day09;
 import aoc.dia10.Day10;
 import aoc.dia11.Day11;
+import aoc.dia12.Day12;
 import aoc.registry.DayRegistry;
 
 import java.util.Map;
@@ -53,7 +54,8 @@ public class Main {
                     Map.entry(8,  new Day08()),
                     Map.entry(9,  new Day09()),
                     Map.entry(10, new Day10()),
-                    Map.entry(11, new Day11())
+                    Map.entry(11, new Day11()),
+                    Map.entry(12, new Day12())
                 )
         );
     }
