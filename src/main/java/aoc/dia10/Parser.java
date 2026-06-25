@@ -1,6 +1,7 @@
 package aoc.dia10;
 
 import aoc.dia10.model.Machine;
+import aoc.parse.Lines;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -13,7 +14,7 @@ public class Parser {
     private static final Pattern BUTTON = Pattern.compile("\\(([^)]+)\\)");
 
     public static List<Machine> parse(String input) {
-        return input.lines().filter(l -> !l.isBlank()).map(Parser::parseLine).toList();
+        return Lines.nonBlank(input).stream().map(Parser::parseLine).toList();
     }
 
     private static Machine parseLine(String line) {

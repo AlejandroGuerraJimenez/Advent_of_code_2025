@@ -11,7 +11,12 @@ public class CircuitAnalyzer {
         allEdges(points).stream().sorted().limit(connections).forEach(e -> board.union(e.a(), e.b()));
         List<Integer> sizes = board.circuitSizes();
         sizes.sort(Comparator.reverseOrder());
-        if (sizes.size() < 3) throw new IllegalStateException("Menos de 3 circuitos (" + sizes.size() + "). ¿El input tiene suficientes puntos?");
+        return topThree(sizes);
+    }
+
+    private static long topThree(List<Integer> sizes) {
+        if (sizes.size() < 3)
+            throw new IllegalStateException("Menos de 3 circuitos (" + sizes.size() + "). ¿El input tiene suficientes puntos?");
         return (long) sizes.get(0) * sizes.get(1) * sizes.get(2);
     }
 

@@ -245,3 +245,19 @@ El algoritmo lanzaría `StringIndexOutOfBoundsException` porque el rango
 `[from, n-(count-k)]` se volvería negativo. El enunciado garantiza que todos los
 bancos tienen al menos `count` dígitos, así que no se valida. En un sistema de
 producción añadiría una precondición en `BatteryBank` o en `JoltageCalculator`.
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day03` implementa ahora `Day<List<BatteryBank>>`: la entrada se **parsea una
+  sola vez** y ambas partes operan sobre la lista ya parseada.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- `Parser` usa `Lines.nonBlank(input)`.
+
+### Fase 4 — Limpieza
+- Los *magic numbers* `2` y `12` (nº de baterías por parte) pasaron a las
+  constantes `PART1_BATTERIES` y `PART2_BATTERIES`.

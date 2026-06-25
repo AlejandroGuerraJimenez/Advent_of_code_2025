@@ -373,3 +373,21 @@ Las clases están desacopladas, así que se pueden testear aisladas: `Parser` co
 un texto de ejemplo comprobando la lista de `Rotation`; `Dial` aplicando
 rotaciones concretas y verificando la posición y el conteo de ceros; y `Day01`
 con el ejemplo oficial del enunciado (que debe dar 3 y 6).
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day01` implementa ahora `Day<List<Rotation>>`: la entrada se **parsea una sola
+  vez** (`parse`) y ambas partes operan sobre la lista ya parseada (antes cada
+  parte reparseaba el input y recreaba el `Dial`).
+- `part1`/`part2` devuelven `Object`; el `toString` y la presentación los hace
+  `DayRunner`, eliminando los `String.valueOf` repetidos.
+- Se añadió `number()`.
+- La ejecución muestra la etiqueta y el resultado por parte (`Parte 1: 980`), con
+  manejo de errores aislado por parte.
+
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- `Parser` usa `Lines.nonBlank(input)` en vez de reimplementar el filtrado de
+  líneas en blanco.

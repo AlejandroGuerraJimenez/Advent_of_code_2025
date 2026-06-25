@@ -277,3 +277,18 @@ candidatas en lugar de reescanear todo el grid en cada ronda.
 `isRollAt` (bounds + valor), `adjacentRollCount` con casos límite (esquina,
 borde, centro rodeado), y `removeRound` con un mini-grid donde el resultado es
 conocido. Todo son funciones puras o con estado predecible.
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day04` se **parsea una sola vez** y ambas partes operan sobre la rejilla.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- Se eliminó el record local `Grid`: el día usa ahora `aoc.parse.TextGrid`
+  (rejilla compartida con el día 7). `Day04` es `Day<TextGrid>` y
+  `ForkliftAccessChecker` opera sobre `TextGrid`.
+- `Parser` = `TextGrid.fromLines(Lines.nonBlank(input))`.

@@ -200,3 +200,18 @@ La diferencia está solo en la función de conteo, no en la representación.
 |-------|-----------|-----------|-------------|
 | 1 | **714** | DFS + memoización | O(V + E) |
 | 2 | **333852915427200** | DFS + memoización con máscara | O((V + E) · 4) |
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day11` implementa ahora `Day<Map<String, List<String>>>`: el grafo se **parsea
+  una sola vez** y ambas partes operan sobre él.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+### Fase 3 — Value object de dominio (`Graph`)
+- **Nuevo record `Graph`** que envuelve el `Map<String, List<String>>` y expone
+  `neighbors(node)`. `Day11` es ahora `Day<Graph>` y `PathCounter` opera sobre
+  `Graph` en vez de pasar el `Map`/`List` crudos por todos los métodos.
+- `Parser` migrado a `Lines.nonBlank` y comentarios traducidos al español.

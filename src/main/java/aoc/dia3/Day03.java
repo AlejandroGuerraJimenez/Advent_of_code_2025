@@ -6,22 +6,34 @@ import aoc.dia3.model.JoltageCalculator;
 
 import java.util.List;
 
-public class Day03 implements Day {
+public class Day03 implements Day<List<BatteryBank>> {
+
+    private static final int PART1_BATTERIES = 2;
+    private static final int PART2_BATTERIES = 12;
 
     @Override
-    public String part1(String input) {
-        return sumMaxJoltage(Parser.parse(input), 2);
+    public int number() {
+        return 3;
     }
 
     @Override
-    public String part2(String input) {
-        return sumMaxJoltage(Parser.parse(input), 12);
+    public List<BatteryBank> parse(String input) {
+        return Parser.parse(input);
     }
 
-    private String sumMaxJoltage(List<BatteryBank> banks, int count) {
-        long total = banks.stream()
+    @Override
+    public Object part1(List<BatteryBank> banks) {
+        return sumMaxJoltage(banks, PART1_BATTERIES);
+    }
+
+    @Override
+    public Object part2(List<BatteryBank> banks) {
+        return sumMaxJoltage(banks, PART2_BATTERIES);
+    }
+
+    private long sumMaxJoltage(List<BatteryBank> banks, int count) {
+        return banks.stream()
                 .mapToLong(bank -> JoltageCalculator.maxJoltage(bank, count))
                 .sum();
-        return String.valueOf(total);
     }
 }

@@ -6,35 +6,34 @@ import aoc.dia1.model.Rotation;
 
 import java.util.List;
 
-public class Day01 implements Day {
+public class Day01 implements Day<List<Rotation>> {
 
     @Override
-    public String part1(String input) {
-        List<Rotation> rotations = Parser.parse(input);
+    public int number() {
+        return 1;
+    }
+
+    @Override
+    public List<Rotation> parse(String input) {
+        return Parser.parse(input);
+    }
+
+    @Override
+    public Object part1(List<Rotation> rotations) {
         Dial dial = new Dial();
         int count = 0;
-
         for (Rotation rotation : rotations) {
             dial.rotate(rotation);
-            if (dial.isZero()) {
-                count++;
-            }
+            if (dial.isZero()) count++;
         }
-
-        return String.valueOf(count);
+        return count;
     }
 
     @Override
-    public String part2(String input) {
-        List<Rotation> rotations = Parser.parse(input);
+    public Object part2(List<Rotation> rotations) {
         Dial dial = new Dial();
         int count = 0;
-
-        for (Rotation rotation : rotations) {
-            count += dial.rotate(rotation);
-        }
-
-        return String.valueOf(count);
+        for (Rotation rotation : rotations) count += dial.rotate(rotation);
+        return count;
     }
-
 }

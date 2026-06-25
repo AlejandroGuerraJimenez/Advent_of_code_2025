@@ -234,3 +234,20 @@ R: Porque el cambio entre parte 1 y parte 2 es **solo de representación**
 (cómo se codifican los números en el grid), no de operación matemática. La
 evaluación `sum` / `product` es idéntica. Esto es el OCP en acción: se extiende
 el comportamiento añadiendo un nuevo parser sin modificar el evaluador.
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- **Nuevo record `Worksheets(horizontal, vertical)`** en `model/`: encapsula las
+  dos lecturas del mismo input. `Day06.parse` construye **ambas una sola vez**
+  (`Parser.parse` + `Parser.parseVertical`); antes cada parte parseaba por su
+  cuenta dentro de `part1`/`part2`.
+- `Day06` implementa `Day<Worksheets>`; `part1` usa la horizontal y `part2` la
+  vertical.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- `Parser.parse` y `Parser.parseVertical` usan `Lines.nonBlank(input)`.

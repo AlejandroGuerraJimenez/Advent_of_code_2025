@@ -2,16 +2,27 @@ package aoc.dia4;
 
 import aoc.core.Day;
 import aoc.dia4.model.ForkliftAccessChecker;
+import aoc.parse.TextGrid;
 
-public class Day04 implements Day {
+public class Day04 implements Day<TextGrid> {
 
     @Override
-    public String part1(String input) {
-        return String.valueOf(ForkliftAccessChecker.countAccessible(Parser.parse(input)));
+    public int number() {
+        return 4;
     }
 
     @Override
-    public String part2(String input) {
-        return String.valueOf(ForkliftAccessChecker.countRemovable(Parser.parse(input)));
+    public TextGrid parse(String input) {
+        return Parser.parse(input);
+    }
+
+    @Override
+    public Object part1(TextGrid grid) {
+        return ForkliftAccessChecker.countAccessible(grid);
+    }
+
+    @Override
+    public Object part2(TextGrid grid) {
+        return ForkliftAccessChecker.countRemovable(grid);
     }
 }

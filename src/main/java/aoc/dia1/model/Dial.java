@@ -9,14 +9,14 @@ public class Dial {
 
     public int rotate(Rotation r) {
         int delta = r.direction() == Direction.RIGHT ? 1 : -1;
-        int count = 0;
-        for (int step = 0; step < r.steps(); step++) {
-            move(delta);
-            if (isZero()) {
-                count++;
-            }
-        }
-        return count;
+        int zeros = 0;
+        for (int step = 0; step < r.steps(); step++) zeros += moveAndCount(delta);
+        return zeros;
+    }
+
+    private int moveAndCount(int delta) {
+        move(delta);
+        return isZero() ? 1 : 0;
     }
 
     private void move(int delta) {

@@ -330,3 +330,57 @@ cada uno según la parte, sin lógica propia.
 |-------|-----------|-----------|-------------|
 | 1 | **415** | BFS bitmask | O(2ⁿ · |buttons|) por máquina |
 | 2 | **16663** | B&B + simplex Q exacto | exponencial acotado en k,n ≤ 13 |
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day10` implementa ahora `Day<List<Machine>>`: las máquinas se **parsean una
+  sola vez** y ambas partes operan sobre la lista (antes cada parte llamaba a
+  `Parser.parse` con la lógica de stream inline).
+- `part1` delega en `ButtonSolver` y `part2` en `JoltageSolver` sobre el mismo
+  modelo.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- `Parser` usa `Lines.nonBlank(input)`; el resto del parseo (regex de botones,
+  máscaras, joltages) se mantiene por ser específico del formato del día.
+
+### Enriquecimiento local — `optimization/`
+- **`JoltageSolver`** reducido a fachada (~25 líneas): adapta `Machine` → matrices
+  ILP y delega en `BranchAndBoundSolver`.
+- **`optimization/Rational`**: fracciones exactas (antes inner class `Q`).
+- **`optimization/SimplexSolver`**: simplex de dos fases + expulsión de artificiales.
+- **`optimization/BranchAndBoundSolver`**: ramificación entera sobre el LP relajado.
+- Tests en `src/test/java/aoc/dia10/Day10Test.java` (415 / 16663).
+
+#### Justificación
+
+**Por qué enriquecer este día.** `JoltageSolver` concentraba ~260 líneas y cuatro
+responsabilidades distintas: fracciones exactas (`Q`), simplex de dos fases,
+branch-and-bound y traducción `Machine` → matrices ILP. Era el monolito más claro
+del proyecto; cualquier cambio en el LP o el B&B obligaba a navegar un solo fichero.
+
+**Por qué `optimization/`.** Las tres clases extraídas forman una familia técnica
+propia del puzzle (programación lineal entera), no del dominio “máquina de luces”.
+`ButtonSolver` (BFS bitmask, parte 1) se queda en `model/` porque es otro algoritmo
+con otra razón de cambio. `optimization/` agrupa LP + B&B sin sacarlos a un paquete
+global: son infraestructura *de este día*, no reutilizable en otros puzzles.
+
+**Por qué no subir `Rational` a `aoc.parse` o similar.** Las fracciones exactas solo
+las usa el simplex del día 10; extraerlas al shared kernel añadiría acoplamiento
+falso. El criterio acordado fue enriquecer **dentro del día**, no globalizar.
+
+**Por qué `JoltageSolver` como fachada.** `Day10.part2` solo necesita
+`minPresses(Machine)`; ocultar simplex + B&B detrás de esa API mantiene el contrato
+estable y concentra la adaptación del puzzle al ILP en un sitio pequeño (~25 líneas).
+
+**Patrón aplicado.** Facade sobre tres componentes con SRP: `Rational` (aritmética),
+`SimplexSolver` (relajación LP), `BranchAndBoundSolver` (enteridad). Misma
+separación que en diseño de optimización clásico, pero acotada a `dia10`.
+
+**Tests.** El simplex con expulsión de artificiales es frágil; los tests fijan
+**415** (parte 1, sin cambios) y **16663** (parte 2) sobre el input real para
+detectar regresiones numéricas.

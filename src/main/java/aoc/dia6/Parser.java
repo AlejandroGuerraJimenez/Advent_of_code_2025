@@ -2,6 +2,7 @@ package aoc.dia6;
 
 import aoc.dia6.model.MathWorksheet;
 import aoc.dia6.model.Problem;
+import aoc.parse.Lines;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,7 +10,7 @@ import java.util.List;
 public class Parser {
 
     public static MathWorksheet parse(String input) {
-        List<String> rows = input.lines().filter(l -> !l.isBlank()).toList();
+        List<String> rows = Lines.nonBlank(input);
         return new MathWorksheet(findGroups(rows).stream().map(g -> parseProblem(rows, g)).toList());
     }
 
@@ -35,7 +36,7 @@ public class Parser {
     }
 
     public static MathWorksheet parseVertical(String input) {
-        List<String> rows = input.lines().filter(l -> !l.isBlank()).toList();
+        List<String> rows = Lines.nonBlank(input);
         return new MathWorksheet(findGroups(rows).stream().map(g -> parseProblemVertical(rows, g)).toList());
     }
 

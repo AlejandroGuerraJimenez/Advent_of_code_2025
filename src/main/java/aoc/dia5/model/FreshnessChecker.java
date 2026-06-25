@@ -1,5 +1,7 @@
 package aoc.dia5.model;
 
+import aoc.parse.LongRange;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -12,30 +14,30 @@ public class FreshnessChecker {
                 .count();
     }
 
-    public static long countAllFresh(List<FreshRange> ranges) {
-        return mergeRanges(ranges).stream()
-                .mapToLong(r -> r.end() - r.start() + 1)
+    public static long countAllFresh(IngredientDatabase db) {
+        return mergeRanges(db.freshRanges()).stream()
+                .mapToLong(LongRange::length)
                 .sum();
     }
 
-    private static boolean isFresh(long id, List<FreshRange> ranges) {
+    private static boolean isFresh(long id, List<LongRange> ranges) {
         return ranges.stream().anyMatch(r -> r.contains(id));
     }
 
-    private static List<FreshRange> mergeRanges(List<FreshRange> ranges) {
-        List<FreshRange> sorted = ranges.stream()
-                .sorted(Comparator.comparingLong(FreshRange::start))
+    private static List<LongRange> mergeRanges(List<LongRange> ranges) {
+        List<LongRange> sorted = ranges.stream()
+                .sorted(Comparator.comparingLong(LongRange::start))
                 .toList();
-        List<FreshRange> result = new ArrayList<>();
+        List<LongRange> result = new ArrayList<>();
         result.add(sorted.getFirst());
         sorted.subList(1, sorted.size()).forEach(r -> mergeInto(result, r));
         return result;
     }
 
-    private static void mergeInto(List<FreshRange> merged, FreshRange next) {
-        FreshRange last = merged.getLast();
-        if (next.start() <= last.end() + 1)
-            merged.set(merged.size() - 1, new FreshRange(last.start(), Math.max(last.end(), next.end())));
+    private static void mergeInto(List<LongRange> merged, LongRange next) {
+        LongRange last = merged.getLast();
+        if (last.connectsWith(next))
+            merged.set(merged.size() - 1, last.union(next));
         else
             merged.add(next);
     }

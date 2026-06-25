@@ -292,3 +292,21 @@ una interfaz `InvalidIdRule` con implementaciones concretas.
   `IdRange` correcta.
 - `Day02.part1` / `part2`: test de integración con el ejemplo completo del
   enunciado, esperando 1227775554 y 4174379265.
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day02` implementa ahora `Day<List<IdRange>>`: la entrada se **parsea una sola
+  vez** y ambas partes operan sobre la lista ya parseada.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`,
+  eliminando los `String.valueOf`.
+- Se añadió `number()`.
+- La ejecución muestra la etiqueta y el resultado por parte, con manejo de errores aislado.
+
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- Se eliminó el record local `IdRange`: ahora se usa el value object compartido
+  `aoc.parse.LongRange` (`parse`, `contains`, `length`, `union`).
+- `Parser` parsea con `LongRange::parse`; `InvalidIdChecker` y `Day02` operan
+  sobre `List<LongRange>`.

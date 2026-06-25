@@ -318,3 +318,19 @@ llamador a comprobar el valor de retorno y hace que un error silencioso se
 propague como respuesta incorrecta. Una excepción detiene la ejecución
 inmediatamente y da un mensaje descriptivo del problema real. Seguir el
 principio de "fail fast" es mejor que propagar valores inválidos.
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day08` implementa ahora `Day<List<Point3D>>`: los puntos se **parsean una sola
+  vez** y ambas partes operan sobre la lista.
+- **Magic number eliminado**: el umbral `1000` de la parte 1 pasó a la constante
+  nombrada `PART1_THRESHOLD`.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- `Parser` usa `Lines.nonBlank` y `Coordinates.ints(line)` para los puntos 3D
+  (parseo de coordenadas CSV compartido con el día 9).

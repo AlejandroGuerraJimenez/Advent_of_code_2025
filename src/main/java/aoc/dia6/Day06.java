@@ -2,16 +2,27 @@ package aoc.dia6;
 
 import aoc.core.Day;
 import aoc.dia6.model.WorksheetSolver;
+import aoc.dia6.model.Worksheets;
 
-public class Day06 implements Day {
+public class Day06 implements Day<Worksheets> {
 
     @Override
-    public String part1(String input) {
-        return String.valueOf(WorksheetSolver.grandTotal(Parser.parse(input)));
+    public int number() {
+        return 6;
     }
 
     @Override
-    public String part2(String input) {
-        return String.valueOf(WorksheetSolver.grandTotal(Parser.parseVertical(input)));
+    public Worksheets parse(String input) {
+        return new Worksheets(Parser.parse(input), Parser.parseVertical(input));
+    }
+
+    @Override
+    public Object part1(Worksheets worksheets) {
+        return WorksheetSolver.grandTotal(worksheets.horizontal());
+    }
+
+    @Override
+    public Object part2(Worksheets worksheets) {
+        return WorksheetSolver.grandTotal(worksheets.vertical());
     }
 }

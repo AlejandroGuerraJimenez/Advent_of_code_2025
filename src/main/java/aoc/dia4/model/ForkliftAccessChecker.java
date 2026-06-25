@@ -1,5 +1,7 @@
 package aoc.dia4.model;
 
+import aoc.parse.TextGrid;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -16,23 +18,23 @@ public class ForkliftAccessChecker {
 
     // --- Parte 1: snapshot inmutable ---
 
-    public static long countAccessible(Grid grid) {
+    public static long countAccessible(TextGrid grid) {
         return IntStream.range(0, grid.height())
                 .mapToLong(r -> countAccessibleInRow(grid, r))
                 .sum();
     }
 
-    private static long countAccessibleInRow(Grid grid, int row) {
+    private static long countAccessibleInRow(TextGrid grid, int row) {
         return IntStream.range(0, grid.width())
                 .filter(c -> isAccessible(grid, row, c))
                 .count();
     }
 
-    private static boolean isAccessible(Grid grid, int row, int col) {
+    private static boolean isAccessible(TextGrid grid, int row, int col) {
         return grid.at(row, col) == '@' && adjacentRollCount(grid, row, col) < MAX_ADJACENT;
     }
 
-    private static long adjacentRollCount(Grid grid, int row, int col) {
+    private static long adjacentRollCount(TextGrid grid, int row, int col) {
         return Arrays.stream(DIRS)
                 .filter(d -> grid.inBounds(row + d[0], col + d[1]))
                 .filter(d -> grid.at(row + d[0], col + d[1]) == '@')
@@ -41,14 +43,14 @@ public class ForkliftAccessChecker {
 
     // --- Parte 2: simulación iterativa sobre grid mutable ---
 
-    public static long countRemovable(Grid grid) {
+    public static long countRemovable(TextGrid grid) {
         char[][] cells = mutableCopy(grid);
         long total = 0, removed;
         do { total += (removed = removeRound(cells)); } while (removed > 0);
         return total;
     }
 
-    private static char[][] mutableCopy(Grid grid) {
+    private static char[][] mutableCopy(TextGrid grid) {
         return grid.rows().stream().map(String::toCharArray).toArray(char[][]::new);
     }
 

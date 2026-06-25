@@ -1,17 +1,28 @@
 package aoc.dia11;
 
 import aoc.core.Day;
+import aoc.dia11.model.Graph;
 import aoc.dia11.model.PathCounter;
 
-public class Day11 implements Day {
+public class Day11 implements Day<Graph> {
 
     @Override
-    public String part1(String input) {
-        return String.valueOf(PathCounter.countPaths(Parser.parse(input)));
+    public int number() {
+        return 11;
     }
 
     @Override
-    public String part2(String input) {
-        return String.valueOf(PathCounter.countPathsThrough(Parser.parse(input), "dac", "fft"));
+    public Graph parse(String input) {
+        return Parser.parse(input);
+    }
+
+    @Override
+    public Object part1(Graph graph) {
+        return PathCounter.countPaths(graph);
+    }
+
+    @Override
+    public Object part2(Graph graph) {
+        return PathCounter.countPathsThrough(graph, "dac", "fft");
     }
 }

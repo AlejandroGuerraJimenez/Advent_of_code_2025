@@ -53,11 +53,16 @@ evento. No tiene puzzle propio.
 ```
 aoc.dia12
 ├── Day12.java          ← Entry point del día
-├── Parser.java         ← Parsea figuras y regiones
+├── Parser.java         ← Fachada; delega en adapter/
+├── adapter/            ← Adaptadores del formato de input (no confundir con aoc.parse)
+│   ├── PuzzleAdapter.java
+│   ├── ShapeParser.java
+│   └── RegionParser.java
 └── model/
-    ├── Shape.java      ← Polimino + sus orientaciones distintas
-    ├── Region.java     record(width, height, counts[])
-    └── Packer.java     ← Empaquetador DFS con backtracking
+    ├── PuzzleInput.java ← Modelo parseado (figuras + regiones)
+    ├── Shape.java
+    ├── Region.java
+    └── Packer.java
 ```
 
 ---
@@ -66,7 +71,7 @@ aoc.dia12
 
 ```
 input (String)
-  → Parser.parse()                Input(shapes[], List<Region>)
+  → Parser.parse() / PuzzleAdapter.parse()   PuzzleInput(shapes[], List<Region>)
   → por cada Region:
        Packer.fits(region, shapes):
          requeridas = Σ counts[s] · shapes[s].cells()
@@ -223,3 +228,56 @@ descompone en métodos pequeños (`nextEmpty`, `tryPresents`, `tryShape`,
 |-------|-----------|-----------|--------|
 | 1 | **541** | Packing DFS + backtracking (poda de área) | ≈ 0,3 s |
 | 2 | Estrella gratis | — | — |
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day12` implementa ahora `Day<PuzzleInput>`: las figuras y regiones se
+  **parsean una sola vez** y ambas partes operan sobre el modelo.
+- `part1` cuenta las regiones que encajan; `part2` devuelve el mensaje de
+  estrella gratis.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+- La normalización `\r\n → \n` se trasladó a `InputReader` (antes estaba en el
+  `Parser` del día).
+
+### Enriquecimiento local — `adapter/` + `PuzzleInput`
+- **`model/PuzzleInput`**: el record de entrada parseada deja de vivir en `Parser`.
+- **`adapter/`** (no `parse/`): adaptadores del formato concreto del puzzle;
+  evita confusión con el paquete transversal `aoc.parse`.
+  - `ShapeParser` — bloques 3×3 → `Shape`
+  - `RegionParser` — líneas `WxH: counts` → `Region`
+  - `PuzzleAdapter` — orquesta el parseo completo
+- `Parser.java` queda como fachada de una línea sobre `PuzzleAdapter`.
+- Tests en `src/test/java/aoc/dia12/Day12Test.java` (JUnit 5).
+
+#### Justificación
+
+**Por qué enriquecer este día.** El parser mezclaba dos responsabilidades (figuras
+3×3 y regiones `WxH: counts`) y el record `Input` vivía dentro de `Parser`, mezclando
+formato de entrada con modelo de dominio. No era un monolito grande (~64 líneas),
+pero la frontera entre capas no era honesta.
+
+**Por qué `adapter/` y no `parse/`.** Ya existe el paquete transversal `aoc.parse`
+(`Lines`, `LongRange`, `TextGrid`…): utilidades genéricas de troceo de texto. Una
+carpeta `dia12.parse` usaría el mismo nombre para otra cosa (adaptar el formato
+*concreto* del puzzle). `adapter/` sigue el patrón hexagonal: traduce input externo
+→ tipos del dominio (`Shape`, `Region`, `PuzzleInput`), sin confundirse con la
+infraestructura compartida.
+
+**Por qué no `service/` ni `controller/`.** No hay HTTP, UI ni orquestación entre
+agregados: `Day12` ya es el orquestador y `Packer` el algoritmo. Añadir capas
+enterprise sería ceremonia sin una razón de cambio nueva.
+
+**Por qué `PuzzleInput` en `model/`.** Es el resultado del parseo — el estado con el
+que operan `part1` y `Packer` —, no la lógica de lectura. Pertenece al dominio del
+día, no al adaptador.
+
+**Por qué mantener `Parser.java` en la raíz.** Los otros 11 días exponen `Parser`
+como punto de entrada del parseo; aquí delega en `adapter/` para no romper la
+convención del proyecto.
+
+**Tests.** Verifican que el adaptador produce un modelo válido y que la respuesta
+del input real sigue siendo **541** tras el refactor.

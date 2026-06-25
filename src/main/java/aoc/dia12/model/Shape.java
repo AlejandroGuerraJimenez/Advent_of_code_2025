@@ -6,9 +6,10 @@ import java.util.List;
 import java.util.function.UnaryOperator;
 
 /**
- * A present shape (polyomino inside a 3x3 box). Pre-computes every distinct
- * orientation (4 rotations x optional flip), each stored as a scan-ordered list
- * of {row, col} offsets normalised so the top-left of its bounding box is (0,0).
+ * La forma de un regalo (poliominó dentro de una caja 3x3). Precalcula todas las
+ * orientaciones distintas (4 rotaciones x volteo opcional), cada una almacenada
+ * como una lista en orden de escaneo de desplazamientos {fila, columna},
+ * normalizada para que la esquina superior izquierda de su caja sea (0,0).
  */
 public final class Shape {
 

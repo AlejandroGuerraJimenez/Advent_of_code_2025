@@ -269,3 +269,23 @@ no se valida. En producción añadiría una precondición o excepción descripti
 Con cuatro casos: rangos sin solapamiento, con solapamiento parcial, un rango
 completamente contenido en otro, y rangos adyacentes sin hueco. Son casos
 límite del `+1` en la condición de fusión.
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day05` implementa ahora `Day<IngredientDatabase>`: la base de datos se
+  **parsea una sola vez** y ambas partes operan sobre ella.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- Se eliminó el record local `FreshRange`: se usa `aoc.parse.LongRange` (la
+  fusión de rangos usa `LongRange.union` y `length`).
+- `Parser` usa `Sections.splitByBlankLine` para separar rangos e ids (antes
+  `lines.indexOf("")`, que era frágil).
+
+### Fase 4 — Limpieza
+- `FreshnessChecker.countAllFresh` recibe ahora la `IngredientDatabase` y accede
+  internamente a sus rangos; `Day05.part2` ya no llama a `database.freshRanges()`
+  cruda (se elimina la fuga de la abstracción).

@@ -2,14 +2,14 @@ package aoc.dia1;
 
 import aoc.dia1.model.Direction;
 import aoc.dia1.model.Rotation;
+import aoc.parse.Lines;
 
 import java.util.List;
 
 public class Parser {
 
     public static List<Rotation> parse(String input) {
-        return input.lines()
-                .filter(line -> !line.isBlank())
+        return Lines.nonBlank(input).stream()
                 .map(Parser::parseLine)
                 .toList();
     }

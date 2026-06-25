@@ -28,10 +28,14 @@ public class CircuitBoard {
     public boolean union(int a, int b) {
         int ra = find(a), rb = find(b);
         if (ra == rb) return false;
-        if (rank[ra] >= rank[rb]) { parent[rb] = ra; if (rank[ra] == rank[rb]) rank[ra]++; }
-        else parent[ra] = rb;
+        link(ra, rb);
         components--;
         return true;
+    }
+
+    private void link(int ra, int rb) {
+        if (rank[ra] >= rank[rb]) { parent[rb] = ra; if (rank[ra] == rank[rb]) rank[ra]++; }
+        else parent[ra] = rb;
     }
 
     public List<Integer> circuitSizes() {

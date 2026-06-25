@@ -1,15 +1,16 @@
 package aoc.dia12.model;
 
 /**
- * Decides whether all required presents fit inside a region without their solid
- * cells overlapping (empty cells are allowed: this is packing, not exact cover).
+ * Decide si todos los regalos requeridos caben dentro de una región sin que sus
+ * celdas sólidas se solapen (se permiten celdas vacías: esto es empaquetado, no
+ * cobertura exacta).
  * <p>
- * Strategy: a depth-first search driven by the first still-empty cell in scan
- * order. That cell is either covered by a present (whose first solid cell is
- * anchored there, guaranteeing no cell before it is touched) or declared a
- * permanent hole. The area check (required cells <= grid area) is a rigorous
- * necessary condition applied first, and the hole budget bounds how many cells
- * may be left empty.
+ * Estrategia: una búsqueda en profundidad guiada por la primera celda aún vacía
+ * en orden de escaneo. Esa celda o bien la cubre un regalo (cuya primera celda
+ * sólida se ancla ahí, garantizando que no se toca ninguna celda anterior) o bien
+ * se declara hueco permanente. La comprobación de área (celdas requeridas <= área
+ * de la rejilla) es una condición necesaria rigurosa que se aplica primero, y el
+ * presupuesto de huecos acota cuántas celdas pueden quedar vacías.
  */
 public final class Packer {
 
@@ -64,12 +65,20 @@ public final class Packer {
     }
 
     private boolean attempt(int s, int[][] orientation, int pos, int[] remaining, int holeBudget) {
+        place(s, orientation, pos, remaining);
+        boolean ok = search(pos, remaining, holeBudget);
+        unplace(s, orientation, pos, remaining);
+        return ok;
+    }
+
+    private void place(int s, int[][] orientation, int pos, int[] remaining) {
         toggle(orientation, pos, true);
         remaining[s]--;
-        boolean ok = search(pos, remaining, holeBudget);
-        remaining[s]++;
+    }
+
+    private void unplace(int s, int[][] orientation, int pos, int[] remaining) {
         toggle(orientation, pos, false);
-        return ok;
+        remaining[s]++;
     }
 
     private boolean tryHole(int pos, int[] remaining, int holeBudget) {

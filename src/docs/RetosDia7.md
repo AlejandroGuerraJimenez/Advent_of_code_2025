@@ -300,3 +300,20 @@ R: Porque `countFrom(row, col)` escanea desde `row` inclusive. En la fila de S,
 correctamente a la siguiente fila. Empezar en `row_S + 1` también sería válido
 pero menos general — si S estuviera en un borde o si se añadieran nuevas
 variantes del puzzle.
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day07` implementa ahora `Day<Manifold>`: el `Manifold` se **parsea una sola
+  vez** y ambas partes operan sobre él (antes cada parte reparseaba).
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- `Manifold` ahora **envuelve** `aoc.parse.TextGrid` (patrón Adapter): delega
+  `width`/`height`/`at`/`inBounds` y conserva su API basada en `Position` y
+  `start()`. Se elimina la reimplementación de la mecánica de rejilla (antes
+  duplicada respecto al día 4).
+- `Parser` = `new Manifold(TextGrid.fromLines(Lines.all(input)))`.

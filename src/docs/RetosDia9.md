@@ -364,3 +364,52 @@ por ese hueco, quedará como exterior (vacío, ningún tile real allí). La
 comprobación de validez podría fallar si el rectángulo incluye ese hueco vacío
 marcado como exterior. Sin embargo, en el input real las coordenadas están muy
 separadas (del orden de 10^5) y este caso no ocurre.
+
+---
+
+## Mejoras arquitectónicas aplicadas
+
+### Fase 1 — Core: interfaz `Day<T>` con parseo único
+- `Day09` implementa ahora `Day<List<Tile>>`: las baldosas se **parsean una sola
+  vez** y ambas partes operan sobre la lista.
+- `part1`/`part2` devuelven `Object`; el `toString` lo hace `DayRunner`.
+- Se añadió `number()`. La salida muestra la etiqueta y el resultado de cada parte.
+
+### Fase 2 — Utilidades de parseo (`aoc.parse`)
+- `Parser` usa `Lines.nonBlank` y `Coordinates.ints(line)` para las baldosas 2D
+  (parseo de coordenadas CSV compartido con el día 8).
+
+### Enriquecimiento local — `geometry/`
+- **`CompressedPolygon`** reducido a fachada: expone `isValid(a, b)`.
+- **`geometry/CoordinateCompressor`**: compresión de coordenadas (`xs`/`ys`, `cx`/`cy`).
+- **`geometry/BoundaryGrid`**: marca segmentos del polígono en rejilla comprimida.
+- **`geometry/ExteriorFloodFill`**: flood fill del exterior desde el borde.
+- **`geometry/PrefixSumGrid`**: suma acumulada 2D + consultas de rectángulo.
+- Tests en `src/test/java/aoc/dia9/Day9Test.java` (4759531084 / 1539238860).
+
+#### Justificación
+
+**Por qué enriquecer este día.** `CompressedPolygon` mezclaba cinco pasos del
+pipeline geométrico en una sola clase (~85 líneas): compresión de coordenadas,
+construcción del borde, flood fill del exterior, prefix sum 2D y consulta de
+rectángulos. Funcionaba, pero el código no reflejaba la pipeline del enunciado.
+
+**Por qué `geometry/`.** Las cuatro clases extraídas comparten un tema claro del
+puzzle (geometría del polígono en rejilla comprimida), distinto de `Tile` /
+`RectangleSolver` en `model/`. Cumple la regla acordada: 3+ clases con concepto
+común y nombres del dominio, no capas genéricas (`service`, `controller`).
+
+**Por qué `CompressedPolygon` como fachada.** `RectangleSolver` solo necesita
+`isValid(a, b)`; no debe conocer compresión ni flood fill. La fachada ensambla el
+pipeline una vez en el constructor y expone la consulta O(1) que usa la parte 2.
+
+**Por qué no unificar con `Point3D` / `TextGrid` globales.** Las coordenadas del
+día 9 son tiles 2D con compresión específica del polígono; forzar un value object
+transversal empeoraría el modelo. `geometry/` es acotado a este bounded context.
+
+**Orden del pipeline (ahora explícito).**
+`CoordinateCompressor` → `BoundaryGrid` → `ExteriorFloodFill` → `PrefixSumGrid`
+→ consulta en `CompressedPolygon`.
+
+**Tests.** Fijan **4759531084** y **1539238860** sobre el input real; cualquier
+error en flood fill o prefix sum cambiaría la parte 2 de forma no obvia.

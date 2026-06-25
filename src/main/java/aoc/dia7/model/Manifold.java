@@ -1,24 +1,25 @@
 package aoc.dia7.model;
 
-import java.util.List;
+import aoc.parse.TextGrid;
 
-public record Manifold(List<String> rows) {
+/**
+ * El campo de tachyones. Envuelve un {@link TextGrid} y añade el acceso basado
+ * en {@link Position} y la localización del punto de partida 'S'.
+ */
+public record Manifold(TextGrid grid) {
 
-    public int height() { return rows.size(); }
-    public int width()  { return rows.stream().mapToInt(String::length).max().orElse(0); }
-    public char at(Position p) {
-        String row = rows.get(p.row());
-        return p.col() < row.length() ? row.charAt(p.col()) : '.';
-    }
+    public int height() { return grid.height(); }
 
-    public boolean inBounds(Position p) {
-        return p.row() >= 0 && p.row() < height() && p.col() >= 0 && p.col() < width();
-    }
+    public int width() { return grid.width(); }
+
+    public char at(Position p) { return grid.at(p.row(), p.col()); }
+
+    public boolean inBounds(Position p) { return grid.inBounds(p.row(), p.col()); }
 
     public Position start() {
         for (int r = 0; r < height(); r++)
             for (int c = 0; c < width(); c++)
                 if (at(new Position(r, c)) == 'S') return new Position(r, c);
-        throw new IllegalStateException("No S found");
+        throw new IllegalStateException("No se encontró la posición inicial 'S'");
     }
 }

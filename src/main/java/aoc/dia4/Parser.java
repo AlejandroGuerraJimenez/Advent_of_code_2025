@@ -1,15 +1,11 @@
 package aoc.dia4;
 
-import aoc.dia4.model.Grid;
-
-import java.util.List;
+import aoc.parse.Lines;
+import aoc.parse.TextGrid;
 
 public class Parser {
 
-    public static Grid parse(String input) {
-        List<String> rows = input.lines()
-                .filter(line -> !line.isBlank())
-                .toList();
-        return new Grid(rows);
+    public static TextGrid parse(String input) {
+        return TextGrid.fromLines(Lines.nonBlank(input));
     }
 }
