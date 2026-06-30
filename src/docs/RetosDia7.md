@@ -53,7 +53,105 @@ aoc.dia7/
 
 ---
 
-## 5. Colaboración entre clases
+## 5. Modelo de clases UML
+
+Diagrama de clases del módulo `aoc.dia7` y el tipo compartido `TextGrid`. Notación UML 2.5 (misma convención que días 1–6):
+
+- Visibilidad (`+`/`-`): **solo** dentro de cada caja; las flechas no llevan `+`/`-`.
+- **`<<utility>>`**: sustituye repetir `{static}` en cada método.
+- **Asociación** (`-->`): rol, multiplicidad y `{readOnly}` en la flecha; no duplicar como atributo en la caja.
+- **Dependencia** (`..>`): creación o uso puntual con multiplicidad.
+- No se incluyen `Day`, `Lines`, `Queue`, `Set`, `Map`, `List`, ni `String`.
+
+**`Manifold` (`<<Adapter>>`).** Enlaza `grid {readOnly}` hacia `TextGrid` (lo crea `Parser`; el record solo lo referencia). Traduce consultas con `Position` sin almacenar posiciones como campo.
+
+**`TextGrid`.** Misma simplificación que día 4: `+width`, `+empty` en la caja; `rows` (`List<String>` JDK) no se modela.
+
+**`Position`.** Record con `+row int`, `+col int` en la caja; `+key(width)` para claves en visitados/memo.
+
+**Parte 1 vs parte 2.** Mismo `Manifold`. `countSplits` (BFS) en parte 1; `countTimelines` (DFS memoizado) en parte 2. `TachyonSimulator` no accede a `TextGrid` directamente.
+
+```mermaid
+classDiagram
+    direction TB
+
+    namespace aoc.dia7 {
+        class Day07 {
+            +number() int
+            +parse(input String) Manifold
+            +part1(manifold Manifold) Object
+            +part2(manifold Manifold) Object
+        }
+
+        class Parser {
+            <<utility>>
+            +parse(input String) Manifold
+        }
+    }
+
+    namespace aoc.dia7.model {
+        class Manifold {
+            <<Adapter>>
+            <<record>>
+            +height() int
+            +width() int
+            +at(p Position) char
+            +inBounds(p Position) boolean
+            +start() Position
+        }
+
+        class Position {
+            <<record>>
+            +row int
+            +col int
+            +key(width int) long
+        }
+
+        class TachyonSimulator {
+            <<utility>>
+            +countSplits(m Manifold) int
+            +countTimelines(m Manifold) long
+        }
+    }
+
+    namespace aoc.parse {
+        class TextGrid {
+            <<record>>
+            +width int
+            +empty char
+            +fromLines(rows List~String~) TextGrid
+            +height() int
+            +at(row int, col int) char
+            +inBounds(row int, col int) boolean
+        }
+    }
+
+    Day07 "1" ..> "1" Parser
+    Day07 "1" ..> "1" Manifold
+    Day07 "1" ..> "1" TachyonSimulator
+    Parser "1" ..> "1" Manifold
+    Parser "1" ..> "1" TextGrid
+    Manifold "1" --> "1" TextGrid : grid {readOnly}
+    Manifold "1" ..> "1" Position
+    TachyonSimulator "1" ..> "1" Manifold
+    TachyonSimulator "1" ..> "0..*" Position
+```
+
+| Relación | Multiplicidad | Motivo en el código |
+|----------|---------------|---------------------|
+| `Day07` → `Parser` | `1` : `1` | `parse` delega en `Parser`. |
+| `Day07` → `Manifold` | `1` : `1` | Un único manifold parseado para ambas partes. |
+| `Day07` → `TachyonSimulator` | `1` : `1` | `part1` / `part2` delegan en métodos distintos. |
+| `Parser` → `Manifold` | `1` : `1` | Cada `parse` construye un adaptador. |
+| `Parser` → `TextGrid` | `1` : `1` | Crea la rejilla que se pasa al record. |
+| `Manifold` → `TextGrid` | `1` : `1` | Rol `grid {readOnly}`. |
+| `Manifold` → `Position` | `1` : `1` | Argumentos de `at`/`inBounds`; `start()` devuelve una (no es campo). |
+| `TachyonSimulator` → `Manifold` | `1` : `1` | Cada método público recibe un manifold. |
+| `TachyonSimulator` → `Position` | `1` : `0..*` | Colas, visitados y memo crean muchas posiciones. |
+
+---
+
+## 6. Colaboración entre clases
 
 ```
 Parser → TextGrid.fromLines → new Manifold(grid)
@@ -67,7 +165,7 @@ La semántica del día 7 habla en **posiciones nombradas**; `Manifold` traduce a
 
 ---
 
-## 6. Decisiones de este día
+## 7. Decisiones de este día
 
 | Decisión | Motivo |
 |----------|--------|
@@ -77,14 +175,14 @@ La semántica del día 7 habla en **posiciones nombradas**; `Manifold` traduce a
 
 ---
 
-## 7. Patrones
+## 8. Patrones
 
 - **Adapter:** `Manifold` → `TextGrid`.
 - **Value Object:** `Position` (record).
 
 ---
 
-## 8. Dependencias compartidas
+## 9. Dependencias compartidas
 
 - `aoc.parse.TextGrid`, `Lines`
 - `aoc.core.Day`

@@ -55,7 +55,75 @@ aoc.dia4/
 
 ---
 
-## 5. Colaboración entre clases
+## 5. Modelo de clases UML
+
+Diagrama de clases del módulo `aoc.dia4` y el tipo parseado `TextGrid` (shared kernel). Notación UML 2.5 (misma convención que días 1–3):
+
+- Visibilidad (`+`/`-`): **solo** dentro de cada caja; las flechas no llevan `+`/`-`.
+- **`<<utility>>`**: sustituye repetir `{static}` en cada método.
+- Solo **dependencias** (`..>`) con multiplicidad; un único `TextGrid` por ejecución (`1` : `1`).
+- No se incluyen `Day`, `Lines`, `List`, `String`, ni `char[][]`.
+
+**`TextGrid`.** Record compartido con el día 7. En la caja solo primitivos visibles (`+width`, `+empty`) y operaciones de consulta; el campo `rows` (`List<String>`) no se modela (tipo JDK). `+fromLines` es factory del kernel.
+
+**Parte 1 vs parte 2.** Mismo `TextGrid` inmutable en entrada. `countRemovable` copia a `char[][]` internamente; esa copia no aparece en el diagrama.
+
+```mermaid
+classDiagram
+    direction TB
+
+    namespace aoc.dia4 {
+        class Day04 {
+            +number() int
+            +parse(input String) TextGrid
+            +part1(grid TextGrid) Object
+            +part2(grid TextGrid) Object
+        }
+
+        class Parser {
+            <<utility>>
+            +parse(input String) TextGrid
+        }
+    }
+
+    namespace aoc.dia4.model {
+        class ForkliftAccessChecker {
+            <<utility>>
+            +countAccessible(grid TextGrid) long
+            +countRemovable(grid TextGrid) long
+        }
+    }
+
+    namespace aoc.parse {
+        class TextGrid {
+            <<record>>
+            +width int
+            +empty char
+            +fromLines(rows List~String~) TextGrid
+            +height() int
+            +at(row int, col int) char
+            +inBounds(row int, col int) boolean
+        }
+    }
+
+    Day04 "1" ..> "1" Parser
+    Day04 "1" ..> "1" TextGrid
+    Day04 "1" ..> "1" ForkliftAccessChecker
+    Parser "1" ..> "1" TextGrid
+    ForkliftAccessChecker "1" ..> "1" TextGrid
+```
+
+| Relación | Multiplicidad | Motivo en el código |
+|----------|---------------|---------------------|
+| `Day04` → `Parser` | `1` : `1` | `parse` delega en `Parser`. |
+| `Day04` → `TextGrid` | `1` : `1` | Un único grid parseado para ambas partes. |
+| `Day04` → `ForkliftAccessChecker` | `1` : `1` | `part1` / `part2` delegan en métodos distintos. |
+| `Parser` → `TextGrid` | `1` : `1` | Cada `parse` construye un `TextGrid`. |
+| `ForkliftAccessChecker` → `TextGrid` | `1` : `1` | Cada método público recibe un grid (solo lectura; parte 2 copia dentro). |
+
+---
+
+## 6. Colaboración entre clases
 
 ```mermaid
 flowchart LR
@@ -68,7 +136,7 @@ flowchart LR
 
 ---
 
-## 6. Decisiones de este día
+## 7. Decisiones de este día
 
 | Decisión | Motivo |
 |----------|--------|
@@ -78,14 +146,14 @@ flowchart LR
 
 ---
 
-## 7. Patrones
+## 8. Patrones
 
 - **Reutilización de infraestructura:** `TextGrid` como modelo.
 - **Servicio de dominio estático:** `ForkliftAccessChecker` sin estado de instancia.
 
 ---
 
-## 8. Dependencias compartidas
+## 9. Dependencias compartidas
 
 - `aoc.parse.TextGrid`, `Lines`
 - `aoc.core.Day`

@@ -56,7 +56,90 @@ aoc.dia5/
 
 ---
 
-## 5. Colaboración entre clases
+## 5. Modelo de clases UML
+
+Diagrama de clases del módulo `aoc.dia5` y el tipo compartido `LongRange`. Notación UML 2.5 (misma convención que días 1–4):
+
+- Visibilidad (`+`/`-`): **solo** dentro de cada caja; las flechas no llevan `+`/`-`.
+- **`<<utility>>`**: sustituye repetir `{static}` en cada método.
+- **Asociación** (`-->`): rol, multiplicidad y `{readOnly}` en el extremo de la flecha; no duplicar como atributo en la caja.
+- **Dependencia** (`..>`): creación o uso puntual con multiplicidad.
+- No se incluyen `Day`, `Sections`, `List`, ni `Long`.
+
+**`IngredientDatabase`.** `freshRanges` → asociación `freshRanges {readOnly}` hacia `LongRange` (los crea `Parser`, no el record). `ingredientIds` → `+ingredientIds` en la caja (`Long` JDK, sin clase en el diagrama).
+
+**Parte 1 vs parte 2.** Mismo `IngredientDatabase`. `countFresh` usa IDs y rangos; `countAllFresh` fusiona rangos (`connectsWith`, `union`) e ignora IDs.
+
+```mermaid
+classDiagram
+    direction TB
+
+    namespace aoc.dia5 {
+        class Day05 {
+            +number() int
+            +parse(input String) IngredientDatabase
+            +part1(database IngredientDatabase) Object
+            +part2(database IngredientDatabase) Object
+        }
+
+        class Parser {
+            <<utility>>
+            +parse(input String) IngredientDatabase
+        }
+    }
+
+    namespace aoc.dia5.model {
+        class IngredientDatabase {
+            <<record>>
+            +ingredientIds List~Long~
+        }
+
+        class FreshnessChecker {
+            <<utility>>
+            +countFresh(db IngredientDatabase) long
+            +countAllFresh(db IngredientDatabase) long
+        }
+    }
+
+    namespace aoc.parse {
+        class LongRange {
+            <<record>>
+            +start long
+            +end long
+            +parse(token String) LongRange
+            +contains(value long) boolean
+            +length() long
+            +connectsWith(other LongRange) boolean
+            +union(other LongRange) LongRange
+        }
+    }
+
+    Day05 "1" ..> "1" Parser
+    Day05 "1" ..> "1" IngredientDatabase
+    Day05 "1" ..> "1" FreshnessChecker
+    Parser "1" ..> "1" IngredientDatabase
+    Parser "1" ..> "0..*" LongRange
+    FreshnessChecker "1" ..> "1" IngredientDatabase
+    FreshnessChecker "1" ..> "0..*" LongRange
+    IngredientDatabase "1" --> "0..*" LongRange : freshRanges {readOnly}
+```
+
+| Relación | Multiplicidad | Motivo en el código |
+|----------|---------------|---------------------|
+| `Day05` → `Parser` | `1` : `1` | `parse` delega en `Parser`. |
+| `Day05` → `IngredientDatabase` | `1` : `1` | Un único agregado parseado para ambas partes. |
+| `Day05` → `FreshnessChecker` | `1` : `1` | `part1` / `part2` delegan en métodos distintos. |
+| `Parser` → `IngredientDatabase` | `1` : `1` | Cada `parse` construye un record. |
+| `Parser` → `LongRange` | `1` : `0..*` | Un rango por línea en la primera sección. |
+| `FreshnessChecker` → `IngredientDatabase` | `1` : `1` | Cada método recibe una base de datos. |
+| `FreshnessChecker` → `LongRange` | `1` : `0..*` | Consulta o fusiona colecciones de rangos. |
+| `IngredientDatabase` → `LongRange` | `1` : `0..*` | Rol `freshRanges {readOnly}` en la asociación. |
+
+**`ingredientIds`.** Atributo `+ingredientIds` en la caja (elementos `Long`, JDK). Solo interviene en `countFresh` (parte 1).
+
+---
+
+## 6. Colaboración entre clases
 
 ```
 Parser
@@ -74,7 +157,7 @@ Day05.part2 → FreshnessChecker.countAllFresh(db)
 
 ---
 
-## 6. Decisiones de este día
+## 7. Decisiones de este día
 
 | Decisión | Motivo |
 |----------|--------|
@@ -84,14 +167,14 @@ Day05.part2 → FreshnessChecker.countAllFresh(db)
 
 ---
 
-## 7. Patrones
+## 8. Patrones
 
 - **Value Object:** `IngredientDatabase`, `LongRange`.
 - **Facade de datos:** el record agrupa lo que el parser produce.
 
 ---
 
-## 8. Dependencias compartidas
+## 9. Dependencias compartidas
 
 - `aoc.parse.Sections`, `LongRange`
 - `aoc.core.Day`

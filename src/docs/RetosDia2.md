@@ -49,7 +49,76 @@ aoc.dia2/
 
 ---
 
-## 5. Colaboración entre clases
+## 5. Modelo de clases UML
+
+Diagrama de clases del módulo `aoc.dia2` y el tipo parseado `LongRange` (shared kernel). Notación UML 2.5 (misma convención que el día 1):
+
+- Visibilidad (`+`/`-`): **solo** dentro de cada caja; las flechas no llevan `+`/`-`.
+- **`{readOnly}`, rol y multiplicidad** en asociaciones; aquí el modelo es `List<LongRange>` vía **dependencias** con multiplicidad `0..*`.
+- **`<<utility>>`**: sustituye repetir `{static}` en cada método (`Parser`, `InvalidIdChecker`).
+- No se incluyen `Day`, `List`, `Long`, ni `LongPredicate` (Strategy; ver nota al final).
+
+**`LongRange`.** Record con dos primitivos `start` y `end`: van como `+start : long` y `+end : long` en la caja (interfaz pública del record). No hay flecha hacia otro tipo. `+parse` es factory estática del kernel; no marcamos `{static}` porque no es `<<utility>>` completa.
+
+```mermaid
+classDiagram
+    direction TB
+
+    namespace aoc.dia2 {
+        class Day02 {
+            +number() int
+            +parse(input String) List~LongRange~
+            +part1(ranges List~LongRange~) Object
+            +part2(ranges List~LongRange~) Object
+            -sumInvalidIds(ranges List~LongRange~, checker ...) long
+        }
+
+        class Parser {
+            <<utility>>
+            +parse(input String) List~LongRange~
+        }
+    }
+
+    namespace aoc.dia2.model {
+        class InvalidIdChecker {
+            <<utility>>
+            +isInvalid(id long) boolean
+            +isInvalidExtended(id long) boolean
+            +findInvalidIdsIn(range LongRange, isInvalid ...) List~Long~
+        }
+    }
+
+    namespace aoc.parse {
+        class LongRange {
+            <<record>>
+            +start long
+            +end long
+            +parse(token String) LongRange
+            +contains(value long) boolean
+            +length() long
+        }
+    }
+
+    Day02 "1" ..> "1" Parser
+    Day02 "1" ..> "0..*" LongRange
+    Day02 "1" ..> "1" InvalidIdChecker
+    Parser "1" ..> "0..*" LongRange
+    InvalidIdChecker "1" ..> "1" LongRange
+```
+
+| Relación | Multiplicidad | Motivo en el código |
+|----------|---------------|---------------------|
+| `Day02` → `Parser` | `1` : `1` | `parse` delega en `Parser`. |
+| `Day02` → `LongRange` | `1` : `0..*` | `parse` devuelve lista; `part1`/`part2` la reciben. |
+| `Day02` → `InvalidIdChecker` | `1` : `1` | `sumInvalidIds` delega barrido y reglas. |
+| `Parser` → `LongRange` | `1` : `0..*` | Un token `a-b` por coma → un rango; `parse` devuelve todos. |
+| `InvalidIdChecker` → `LongRange` | `1` : `1` | `findInvalidIdsIn` recibe un rango por invocación (`flatMap` en `Day02`). |
+
+**Strategy (`LongPredicate`).** `part1` y `part2` pasan distinto criterio a `sumInvalidIds` → `findInvalidIdsIn`. Es tipo JDK; no va como clase en el diagrama (por eso `checker ...` e `isInvalid ...` en las firmas).
+
+---
+
+## 6. Colaboración entre clases
 
 ```
 Day02.partN(ranges)
@@ -63,7 +132,7 @@ Day02.partN(ranges)
 
 ---
 
-## 6. Decisiones de este día
+## 7. Decisiones de este día
 
 | Decisión | Motivo |
 |----------|--------|
@@ -73,7 +142,7 @@ Day02.partN(ranges)
 
 ---
 
-## 7. Patrones
+## 8. Patrones
 
 - **Strategy:** `LongPredicate` intercambiable entre partes (method references).
 - **Value Object:** `LongRange` compartido (`contains`, `length`).
@@ -81,7 +150,7 @@ Day02.partN(ranges)
 
 ---
 
-## 8. Dependencias compartidas
+## 9. Dependencias compartidas
 
 - `aoc.parse.LongRange` — parseo y rango inclusivo
 - `aoc.core.Day`

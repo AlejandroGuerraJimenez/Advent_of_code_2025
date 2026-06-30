@@ -61,7 +61,70 @@ La máscara codifica si ya se visitó `dac` (bit 1) y/o `fft` (bit 2).
 
 ---
 
-## 5. Colaboración entre clases
+## 5. Modelo de clases UML
+
+Diagrama de clases del módulo `aoc.dia11`. Notación UML 2.5 (misma convención que días 1–10):
+
+- Visibilidad (`+`/`-`): **solo** dentro de cada caja; las flechas no llevan `+`/`-`.
+- **`<<utility>>`**: sustituye repetir `{static}` en cada método.
+- **Dependencia** (`..>`): creación o uso puntual con multiplicidad.
+- No se incluyen `Day`, `Lines`, `Map`, `List`, ni `String`.
+
+**`Graph`.** El record envuelve `Map<String, List<String>>` (JDK); no se modela. La API de dominio es `+neighbors`.
+
+**Parte 1 vs parte 2.** Mismo `Graph`. Parte 1: `countPaths` (`you` → `out`). Parte 2: `countPathsThrough` con nodos obligatorios `"dac"` y `"fft"` (máscara de bits en memo).
+
+```mermaid
+classDiagram
+    direction TB
+
+    namespace aoc.dia11 {
+        class Day11 {
+            +number() int
+            +parse(input String) Graph
+            +part1(graph Graph) Object
+            +part2(graph Graph) Object
+        }
+
+        class Parser {
+            <<utility>>
+            +parse(input String) Graph
+        }
+    }
+
+    namespace aoc.dia11.model {
+        class Graph {
+            <<record>>
+            +neighbors(node String) List~String~
+        }
+
+        class PathCounter {
+            <<utility>>
+            +countPaths(graph Graph) long
+            +countPathsThrough(graph Graph, req1 String, req2 String) long
+        }
+    }
+
+    Day11 "1" ..> "1" Parser
+    Day11 "1" ..> "1" Graph
+    Day11 "1" ..> "1" PathCounter
+    Parser "1" ..> "1" Graph
+    PathCounter "1" ..> "1" Graph
+```
+
+| Relación | Multiplicidad | Motivo en el código |
+|----------|---------------|---------------------|
+| `Day11` → `Parser` | `1` : `1` | `parse` delega en `Parser`. |
+| `Day11` → `Graph` | `1` : `1` | Un único grafo parseado para ambas partes. |
+| `Day11` → `PathCounter` | `1` : `1` | `part1` / `part2` delegan en métodos distintos. |
+| `Parser` → `Graph` | `1` : `1` | Cada `parse` construye el DAG. |
+| `PathCounter` → `Graph` | `1` : `1` | DFS consulta `neighbors` por nodo. |
+
+**Memo interna.** `Map<String, Long>` (parte 1) y `Map<String, long[]>` (parte 2) no aparecen en el diagrama.
+
+---
+
+## 6. Colaboración entre clases
 
 ```
 Parser → Graph(adjacency)
@@ -73,7 +136,7 @@ PathCounter → dfs desde nodo origen
 
 ---
 
-## 6. Decisiones de este día
+## 7. Decisiones de este día
 
 | Decisión | Motivo |
 |----------|--------|
@@ -84,21 +147,21 @@ PathCounter → dfs desde nodo origen
 
 ---
 
-## 7. Patrones
+## 8. Patrones
 
 - **Value Object:** `Graph`.
 - **Memoization** (técnica algorítmica en `PathCounter`).
 
 ---
 
-## 8. Dependencias compartidas
+## 9. Dependencias compartidas
 
 - `aoc.parse.Lines`
 - `aoc.core.Day`
 
 ---
 
-## 9. Resultados verificados
+## 10. Resultados verificados
 
 - Parte 1: `714`
 - Parte 2: `333852915427200`
